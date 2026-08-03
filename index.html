@@ -220,6 +220,12 @@
 		margin-top: 8px;
 	}
 	
+	button {
+		user-select: none;
+		-webkit-user-select: none;
+  		-ms-user-select: none;
+	}
+	
 	.number-input-container {
 		display: flex;
 		flex-direction: column;
@@ -428,7 +434,7 @@
 	const parsedCustomQuotes = parseQuoteList(customQuotesRaw);
 	const allQuotes = formattedQuotes.concat(parsedCustomQuotes);
 
-	const AUTO_ADVANCE_MS = 1800;
+	const AUTO_ADVANCE_MS = 1300;
 
 	let quotes = [];					// shuffled working copy
 	let viewIndex = 0;				// which question is currently displayed
