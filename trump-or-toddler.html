@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trump or Toddler?</title>
+<style>
+	:root {
+		--ink: #1a1a1a;
+		--paper: #f2ede3;
+		--red: #b5322f;
+		--gold: #c9a24b;
+		--green: #2c7a3d;
+		--line: #2a2a2a;
+	}
+
+	* { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		min-height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--paper);
+		background-image:
+			repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 3px);
+		font-family: Georgia, 'Times New Roman', serif;
+		color: var(--ink);
+		padding: 24px;
+	}
+
+	.masthead {
+		text-align: center;
+		max-width: 560px;
+		width: 100%;
+	}
+
+	h1 {
+		font-family: 'Impact', 'Arial Black', sans-serif;
+		font-size: clamp(2rem, 8vw, 3.2rem);
+		letter-spacing: 1px;
+		margin: 0 0 4px;
+		border-bottom: 4px solid var(--line);
+		border-top: 4px solid var(--line);
+		padding: 10px 0;
+	}
+
+	h1 span { color: var(--red); }
+
+	.subhead {
+		font-style: italic;
+		font-size: 0.95rem;
+		margin: 8px 0 24px;
+		color: #555;
+	}
+
+	.scoreboard {
+		display: flex;
+		justify-content: space-between;
+		font-family: 'Courier New', monospace;
+		font-size: 0.85rem;
+		margin-bottom: 14px;
+		padding: 0 4px;
+		color: #444;
+	}
+
+	.card {
+		background: #fffdf8;
+		border: 3px solid var(--line);
+		box-shadow: 6px 6px 0 var(--line);
+		padding: 32px 24px;
+		min-height: 180px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		position: relative;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	}
+
+	.card.correct {
+		border-color: var(--green);
+		box-shadow: 6px 6px 0 var(--green);
+	}
+
+	.card.wrong {
+		border-color: var(--red);
+		box-shadow: 6px 6px 0 var(--red);
+		animation: shake 0.35s ease;
+	}
+
+	@keyframes shake {
+		0%, 100% { transform: translateX(0); }
+		20% { transform: translateX(-6px); }
+		40% { transform: translateX(6px); }
+		60% { transform: translateX(-4px); }
+		80% { transform: translateX(4px); }
+	}
+
+	.quote {
+		font-size: clamp(1.1rem, 4vw, 1.5rem);
+		line-height: 1.4;
+	}
+
+	.quote::before { content: "\201C"; }
+	.quote::after { content: "\201D"; }
+
+	.buttons {
+		display: flex;
+		gap: 16px;
+		margin-top: 20px;
+	}
+
+	button.choice {
+		flex: 1;
+		padding: 16px 8px;
+		font-family: 'Impact', 'Arial Black', sans-serif;
+		font-size: 1.2rem;
+		letter-spacing: 0.5px;
+		border: 3px solid var(--line);
+		background: var(--paper);
+		color: var(--ink);
+		cursor: pointer;
+		transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+		box-shadow: 4px 4px 0 var(--line);
+	}
+
+	button.choice:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--line); }
+	button.choice:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--line); }
+
+	button.choice.trump { border-color: var(--red); }
+	button.choice.toddler { border-color: var(--gold); }
+
+	button.choice:disabled { cursor: default; }
+
+	button.choice.picked-correct {
+		background: var(--green);
+		border-color: var(--green);
+		color: #fff;
+		box-shadow: 4px 4px 0 var(--line);
+		transform: none;
+	}
+
+	button.choice.picked-wrong {
+		background: var(--red);
+		border-color: var(--red);
+		color: #fff;
+		box-shadow: 4px 4px 0 var(--line);
+		transform: none;
+	}
+
+	button.choice.reveal-correct {
+		border-color: var(--green);
+		box-shadow: 0 0 0 2px var(--green) inset;
+	}
+
+	.feedback {
+		margin-top: 14px;
+		min-height: 26px;
+		font-family: 'Courier New', monospace;
+		font-weight: bold;
+		font-size: 1rem;
+	}
+
+	.feedback.correct { color: var(--green); }
+	.feedback.wrong { color: var(--red); }
+
+	.source {
+		margin-top: 12px;
+		min-height: 18px;
+		font-family: Georgia, 'Times New Roman', serif;
+		font-style: italic;
+		font-size: 0.85rem;
+		color: #666;
+	}
+
+	.nav-buttons {
+		display: flex;
+		gap: 12px;
+		margin-top: 16px;
+	}
+
+	.nav-buttons button {
+		flex: 1;
+		padding: 10px;
+		font-family: 'Courier New', monospace;
+		font-weight: bold;
+		background: var(--ink);
+		color: var(--paper);
+		border: none;
+		cursor: pointer;
+	}
+
+	.nav-buttons button:disabled {
+		background: #999;
+		cursor: not-allowed;
+		opacity: 0.6;
+	}
+
+	.final { display: none; }
+
+	.final h2 {
+		font-family: 'Impact', 'Arial Black', sans-serif;
+		font-size: 2rem;
+	}
+
+	.restart-btn {
+		padding: 10px 24px;
+		font-family: 'Courier New', monospace;
+		font-weight: bold;
+		background: var(--red);
+		color: #fff;
+		border: none;
+		cursor: pointer;
+		margin-top: 8px;
+	}
+	
+	.number-input-container {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		max-width: 200px;
+	}
+
+	/* Label styling */
+	.number-input-container label {
+		font-size: 14px;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	/* Main Input styling */
+	.number-input-container input[type="number"] {
+		width: 100%;
+		padding: 10px 14px;
+		font-size: 16px; /* Prevents iOS auto-zoom on focus */
+		color: #1f2937;
+		background-color: #ffffff;
+		border: 1px solid #d1d5db;
+		border-radius: 8px;
+		box-sizing: border-box;
+		outline: none;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	/* Smooth Focus Effect */
+	.number-input-container input[type="number"]:focus {
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+	}
+
+	/* Hover State */
+	.number-input-container input[type="number"]:hover:not(:focus) {
+		-color: #9ca3af;
+	}
+
+	/* =======================================================
+	CRITICAL: Remove default browser spin arrows (spinners)
+	======================================================= */
+	/* Chrome, Safari, Edge, Opera */
+	.number-input-container input[type="number"]::-webkit-outer-spin-button,
+	.number-input-container input[type="number"]::-webkit-inner-spin-button {
+		margin: 0;
+	}
+
+	/* Firefox */
+	.number-input-container input[type="number"] {
+		-moz-appearance: textfield;
+	}
+
+</style>
+</head>
+<body>
+
+<div class="masthead">
+	<h1>TRUMP <span>or</span> TODDLER</h1>
+	<p class="subhead">Can you tell a president's mouth from a preschooler's?</p>
+
+	<div class="scoreboard">
+		<span id="progress">Quote 1 of 20</span>
+		<span id="score">Score: 0</span>
+	</div>
+
+	<div id="quizScreen">
+		<div class="card" id="card">
+			<p class="quote" id="quoteText">Loading...</p>
+			<p class="source" id="sourceText"></p>
+		</div>
+
+		<div class="buttons">
+			<button class="choice trump" id="trumpBtn">TRUMP</button>
+			<button class="choice toddler" id="toddlerBtn">TODDLER</button>
+		</div>
+
+		<p class="feedback" id="feedback"></p>
+
+		<div class="nav-buttons">
+			<button id="backBtn">&larr; Back</button>
+			<button id="nextBtn">Next &rarr;</button>
+		</div>
+	</div>
+
+	<div class="final" id="finalScreen">
+		<h2 id="finalScore"></h2>
+		<p id="finalMessage"></p>
+		<div class="number-input-container" style="display:none;">
+			<label for="numberInput">Want to play again with fewer questions?</label>
+			<input id="numberInput" name="numberInput" type="number" step="1" min="0" placeholder="0">
+		</div>
+		<button class="restart-btn" id="restartBtn">Play Again</button>
+	</div>
+</div>
+
+<script>
+	// =====================================================================
+	// PASTE YOUR OWN QUOTES HERE.
+	// One quote per line, formatted as:
+	//	 "Quote text" (Trump) (Optional source)
+	// The second parenthetical (source) is optional — omit it and the game
+	// will just show "source not provided". Blank lines are ignored.
+	// Anything pasted here gets parsed automatically and added to the quote
+	// pool below (it doesn't replace the built-in quotes, it adds to them).
+	// =====================================================================
+	const customQuotesRaw = `
+"Being awake makes me so tired." (Toddler) (a toddler, presumably) 
+"Daddy, you're my daddy." (Trump) (June 25, 2025 - Remarks recalling an interaction with NATO Secretary-General Mark Rutte) 
+"I am the chosen one." (Trump) (2019 remarks to reporters regarding the trade war with China)
+"I can do anything. Well, not anything because some things are really hard." (Toddler) (a toddler, presumably)
+"I counted the chairs and suddenly there were more than before." (Toddler) (a toddler, presumably)
+"I don't know much. I don't think much, but I still think." (Toddler) (a toddler, presumably) 
+"I don't like Tuesdays. They're too fast." (Toddler) (a toddler, presumably)
+"I know more about grass than any human being, I think, anywhere in the world" (Trump) (August 21, 2025 - Remarks to law enforcement and National Guard troops in Washington, D.C)
+"I know words. I have the best words." (Trump) (December 30, 2015 - Campaign speech at Hilton Head Island, South Carolina)
+"I like to hug walls. Walls are amazing." (Toddler) (a toddler, presumably) 
+"I never understand wind." (Trump) (December 21, 2019 - Turning Point USA Student Action Summit speech) 
+"I think I am, actually humble. I think I'm much more humble than you would understand." (Trump) (July 17, 2016 - 60 Minutes interview with Lesley Stahl)
+"I think I could run faster than anyone in the world." (Toddler) (a toddler, presumably) 
+"I would give myself an A+. Is that enough? Can I go higher than that?" (Trump) (November 18, 2018 - Fox News Sunday interview with Chris Wallace)
+"I'm really good at noticing things." (Toddler) (a toddler, presumably)
+"It's hot. I need to put on short sleeve pants." (Toddler) (a toddler, presumably)
+"My fingers are long and beautiful." (Trump) (2011 - New York Post interview)
+"Trust me, I'm like a smart person." (Trump) (January 21, 2017 - Remarks at the CIA Headquarters)	
+"When you say no to me, I say the f word in my head." (Toddler) (a toddler, presumably)
+"Why do they call themselves waiters when we are the ones who wait?" (Toddler) (a toddler, presumably)
+"Why hasn't Apple made a phone with 1,000% battery yet?" (Toddler) (a toddler, presumably)
+
+"Can we buy the sun?" (Toddler) (a toddler, presumably)
+"Everything I do is magic." (Toddler) (a toddler, presumably)
+"I am the least racist person there is anywhere in the world." (Trump) (October 22, 2020 - Presidential Debate)
+"I don't need a jacket, I have my own warmness." (Toddler) (a toddler, presumably)
+"I don't want to go to sleep because I have too many thoughts." (Toddler) (a toddler, presumably)
+"I have a very good brain and I've said a lot of things." (Trump) (March 16, 2016 - MSNBC Morning Joe interview)
+"I know more about drones than anybody." (Trump) (January 2, 2019 - Cabinet meeting)
+"I only like the orange ones." (Toddler) (a toddler, presumably)
+"I was a great student. I did great in everything." (Trump) (February 19, 2018 - Speech in Florida)
+"I'm the best at hiding because when I close my eyes nobody can see me." (Toddler) (a toddler, presumably)
+"My favorite thing about myself is how much I know." (Toddler) (a toddler, presumably)
+"Nobody has better respect for intelligence than Donald Trump." (Trump) (January 11, 2017 - Press conference)
+"Nobody reads the Bible more than me." (Trump) (February 26, 2016 - Campaign rally in Texas)
+"Sometimes I'm so fast I leave myself behind." (Toddler) (a toddler, presumably)
+"The moon is following my car and I want it to stop." (Toddler) (a toddler, presumably)
+"This is a tough hurricane. One of the wettest we've ever seen from the standpoint of water." (Trump) (September 19, 2018 - Hurricane Florence briefing)
+"Why are my teeth so sharp today?" (Toddler) (a toddler, presumably)
+"You can't see the wind but it keeps pushing me." (Toddler) (a toddler, presumably)
+
+"They spend a lot of time on raking and cleaning and doing things and they don't have any problem." (Trump) (November 17, 2018 - Remarks in Paradise, California, regarding Finnish forest management)
+"Person, woman, man, camera, TV." (Trump) (July 22, 2020 - Fox News interview with Marc Siegel)
+"Our army manned the air, it rammed the ramparts, it took over the airports, it did everything it had to do..." (Trump) (July 4, 2019 - "Salute to America" Fourth of July speech)
+"All I know about magnets is this: Give me a glass of water, let me drop it on the magnets, that's the end of the magnets." (Trump) (January 5, 2024 - Campaign rally in Mason City, Iowa)
+"I'm not a big fan of sharks." (Trump) (August 20, 2020 - Remarks at a campaign rally in Old Forge, Pennsylvania)
+"I have a natural instinct for science." (Trump) (October 17, 2018 - Associated Press interview on climate change)
+"I don't like the color orange, it tastes like a mistake." (Toddler)
+"I always look orange. And so do you." (Trump) (September 12, 2019 - Remarks at a House Republican retreat dinner, blaming energy-efficient light bulbs)
+"I know all the words to my favorite song, they're just all the wrong words." (Toddler) (a toddler, presumably)
+"The rug has more spots today than yesterday, I counted twice." (Toddler) (a toddler, presumably)
+
+`;
+	// =====================================================================
+
+	// ---------------------------------------------------------------------
+	// Parses raw text formatted like:
+	//	 "Quote text here." (Trump) (Source description here)
+	// into { text, answer, source } objects usable by this game.
+	//
+	// Rules:
+	//	- Quote text must be wrapped in straight or curly double quotes.
+	//	- First parenthetical after the quote = answer ("Trump" or "Toddler").
+	//	- Second parenthetical (optional) = source description.
+	//		If omitted, source falls back to "source not provided".
+	//	- Accepts multiple lines at once; blank lines are skipped.
+	//
+	// Example input line:
+	//	 "I think I am, actually humble. I think I'm much more humble than
+	//	 you would understand." (Trump) (July 17, 2016 - 60 Minutes interview
+	//	 with Lesley Stahl)
+	// ---------------------------------------------------------------------
+	function parseQuoteLine(line) {
+		const cleaned = line.trim();
+		if (!cleaned) return null;
+
+		// Matches: "text" (answer) [(source)]
+		const match = cleaned.match(/^["\u201C](.+?)["\u201D]\s*\(([^)]+)\)\s*(?:\(([^)]+)\))?\s*$/);
+		if (!match) return null;
+
+		const [, text, answer, source] = match;
+		return {
+			text: text.trim(),
+			answer: answer.trim(),
+			source: source ? source.trim() : "source not provided"
+		};
+	}
+
+	function parseQuoteList(rawText) {
+		return rawText
+			.split('\n')
+			.map(parseQuoteLine)
+			.filter(Boolean); // drop blank/unparseable lines
+	}
+
+	const formattedQuotes = [];
+
+	// Parse anything pasted into customQuotesRaw and add it to the pool.
+	const parsedCustomQuotes = parseQuoteList(customQuotesRaw);
+	const allQuotes = formattedQuotes.concat(parsedCustomQuotes);
+
+	const AUTO_ADVANCE_MS = 1800;
+
+	let quotes = [];					// shuffled working copy
+	let viewIndex = 0;				// which question is currently displayed
+	let answers = [];				 // parallel array: null, or { choice, correct }
+	let autoTimer = null;
+	let numQuestions = -1;
+
+	const quoteText = document.getElementById('quoteText');
+	const progress = document.getElementById('progress');
+	const scoreEl = document.getElementById('score');
+	const feedback = document.getElementById('feedback');
+	const sourceText = document.getElementById('sourceText');
+	const trumpBtn = document.getElementById('trumpBtn');
+	const toddlerBtn = document.getElementById('toddlerBtn');
+	const backBtn = document.getElementById('backBtn');
+	const nextBtn = document.getElementById('nextBtn');
+	const restartBtn = document.getElementById('restartBtn');
+	const quizScreen = document.getElementById('quizScreen');
+	const finalScreen = document.getElementById('finalScreen');
+	const finalScore = document.getElementById('finalScore');
+	const finalMessage = document.getElementById('finalMessage');
+	const numberInput = document.getElementById('numberInput');
+	const card = document.getElementById('card');
+	
+	// Parse query parameters
+	const queryString = window.location.search;
+	const urlParams = new URLSearchParams(queryString);
+	
+	if (urlParams.has('number')) {
+		numQuestions = Number(urlParams.get('number'));
+	} else if (urlParams.has('questions')) {
+		numQuestions = Number(urlParams.get('questions'));
+	}
+
+	function shuffle(arr) {
+		const a = arr.slice();
+		const hasLimit = Number.isFinite(numQuestions) && numQuestions > 0;
+		const limit = hasLimit ? Math.min(numQuestions, a.length) : a.length;
+		
+		for (let i = a.length - 1; i > a.length - 1 - limit; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[a[i], a[j]] = [a[j], a[i]];
+		}
+
+		return a.slice(a.length - limit);
+	}
+
+	// Position of the current unanswered "active" question (frontier).
+	function activePos() {
+		for (let i = 0; i < answers.length; i++) {
+			if (answers[i] === null) return i;
+		}
+		return answers.length; // all answered
+	}
+
+	function currentScore() {
+		return answers.filter(a => a && a.correct).length;
+	}
+
+	function clearAutoTimer() {
+		if (autoTimer) {
+			clearTimeout(autoTimer);
+			autoTimer = null;
+		}
+	}
+
+	function resetButtonVisuals() {
+		[trumpBtn, toddlerBtn].forEach(btn => {
+			btn.classList.remove('picked-correct', 'picked-wrong', 'reveal-correct');
+			btn.disabled = false;
+		});
+		card.classList.remove('correct', 'wrong');
+	}
+
+	function render() {
+		const q = quotes[viewIndex];
+		const recorded = answers[viewIndex];
+
+		quoteText.textContent = q.text;
+		progress.textContent = `Quote ${viewIndex + 1} of ${quotes.length}`;
+		scoreEl.textContent = `Score: ${currentScore()}`;
+		resetButtonVisuals();
+		feedback.textContent = '';
+		feedback.className = 'feedback';
+		sourceText.textContent = '';
+
+		if (recorded) {
+			// Already answered: show the recorded outcome, no re-answering.
+			trumpBtn.disabled = true;
+			toddlerBtn.disabled = true;
+
+			const pickedBtn = recorded.choice === 'Trump' ? trumpBtn : toddlerBtn;
+			const correctBtn = q.answer === 'Trump' ? trumpBtn : toddlerBtn;
+
+			if (recorded.correct) {
+				pickedBtn.classList.add('picked-correct');
+				card.classList.add('correct');
+				feedback.textContent = `Correct — that was ${q.answer}.`;
+				feedback.className = 'feedback correct';
+			} else {
+				pickedBtn.classList.add('picked-wrong');
+				correctBtn.classList.add('reveal-correct');
+				card.classList.add('wrong');
+				feedback.textContent = `Nope — that was actually ${q.answer}.`;
+				feedback.className = 'feedback wrong';
+			}
+			sourceText.textContent = `(${q.source})`;
+		}
+
+		backBtn.disabled = viewIndex === 0;
+		nextBtn.disabled = viewIndex >= activePos();
+	}
+
+	function handleAnswer(choice) {
+		if (answers[viewIndex] !== null) return; // already answered, ignore
+		if (viewIndex !== activePos()) return;		// safety: can only answer the active question
+
+		const correct = choice === quotes[viewIndex].answer;
+		answers[viewIndex] = { choice, correct };
+
+		trumpBtn.disabled = true;
+		toddlerBtn.disabled = true;
+
+		const pickedBtn = choice === 'Trump' ? trumpBtn : toddlerBtn;
+		const correctBtn = quotes[viewIndex].answer === 'Trump' ? trumpBtn : toddlerBtn;
+
+		if (correct) {
+			pickedBtn.classList.add('picked-correct');
+			card.classList.add('correct');
+			feedback.textContent = `Correct — that was ${quotes[viewIndex].answer}.`;
+			feedback.className = 'feedback correct';
+		} else {
+			pickedBtn.classList.add('picked-wrong');
+			correctBtn.classList.add('reveal-correct');
+			card.classList.add('wrong');
+			feedback.textContent = `Nope — that was actually ${quotes[viewIndex].answer}.`;
+			feedback.className = 'feedback wrong';
+		}
+		sourceText.textContent = `(${quotes[viewIndex].source})`;
+
+		scoreEl.textContent = `Score: ${currentScore()}`;
+		nextBtn.disabled = false; // can now advance
+		backBtn.disabled = viewIndex === 0;
+
+		clearAutoTimer();
+		autoTimer = setTimeout(() => {
+			advance();
+		}, AUTO_ADVANCE_MS);
+	}
+
+	function advance() {
+		clearAutoTimer();
+		if (viewIndex >= quotes.length - 1) {
+			showFinal();
+			return;
+		}
+		viewIndex++;
+		render();
+	}
+
+	function goBack() {
+		clearAutoTimer();
+		if (viewIndex === 0) return;
+		viewIndex--;
+		render();
+	}
+
+	function goNext() {
+		clearAutoTimer();
+		if (viewIndex >= activePos()) return; // can't skip ahead of what's answered
+		if (viewIndex >= quotes.length - 1) {
+			showFinal();
+			return;
+		}
+		viewIndex++;
+		render();
+	}
+
+	function showFinal() {
+		quizScreen.style.display = 'none';
+		finalScreen.style.display = 'block';
+		const score = currentScore();
+		finalScore.textContent = `${score} / ${quotes.length}`;
+		const pct = score / quotes.length;
+		let msg;
+		if (pct === 1) msg = "Perfect score. You may have spent too much time around toddlers, or the news.";
+		else if (pct >= 0.8) msg = "Impressive ear for unhinged commentary.";
+		else if (pct >= 0.5) msg = "Not bad, the line is blurrier than you'd think.";
+		else msg = "Turns out presidents and preschoolers sound more alike than expected.";
+		finalMessage.textContent = msg;
+	}
+
+	function restart() {
+		clearAutoTimer();
+		quotes = shuffle(allQuotes);
+		answers = new Array(quotes.length).fill(null);
+		viewIndex = 0;
+		quizScreen.style.display = 'block';
+		finalScreen.style.display = 'none';
+		render();
+	}
+
+	trumpBtn.addEventListener('click', () => handleAnswer('Trump'));
+	toddlerBtn.addEventListener('click', () => handleAnswer('Toddler'));
+	backBtn.addEventListener('click', goBack);
+	nextBtn.addEventListener('click', goNext);
+	restartBtn.addEventListener('click', restart);
+
+	restart();
+</script>
+
+</body>
+</html>
